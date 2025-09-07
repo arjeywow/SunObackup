@@ -1,1 +1,380 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Song Generator | Dejavú Product</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
 
+        :root {
+            --bg-color: #121212;
+            --primary-color: #1e1e1e;
+            --secondary-color: #282828;
+            --text-color: #e0e0e0;
+            --accent-color: #bb86fc;
+            --accent-hover: #a05ff9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+        }
+
+        header {
+            grid-column: 1 / -1;
+            text-align: center;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--secondary-color);
+            padding-bottom: 1rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            color: var(--accent-color);
+        }
+
+        .panel {
+            background-color: var(--primary-color);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        h2 {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 300;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: var(--secondary-color);
+            border: 1px solid #444;
+            border-radius: 4px;
+            color: var(--text-color);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 4px;
+            background-color: var(--accent-color);
+            color: #121212;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: var(--accent-hover);
+        }
+        
+        #song-library-list {
+            list-style: none;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        #song-library-list li {
+            background-color: var(--secondary-color);
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .song-info {
+            cursor: pointer;
+        }
+
+        .song-title {
+            font-weight: 600;
+        }
+        .song-genre {
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+        
+        .song-actions button {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            cursor: pointer;
+            opacity: 0.6;
+            transition: opacity 0.3s;
+        }
+        .song-actions button:hover {
+            opacity: 1;
+        }
+
+        #result-display .output-field {
+            margin-bottom: 1.5rem;
+        }
+
+        #result-display .output-field h3 {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .copy-btn {
+            padding: 0.3rem 0.8rem;
+            background-color: var(--secondary-color);
+            border: 1px solid #444;
+            color: var(--accent-color);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        
+        pre {
+            background-color: var(--secondary-color);
+            padding: 1rem;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Courier New', Courier, monospace;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>AI Song Generator</h1>
+            <p>Creado por Dejavú Product</p>
+        </header>
+
+        <aside class="sidebar">
+            <div class="panel">
+                <h2>Generador</h2>
+                <div class="input-group">
+                    <label for="songTitle">Título de la Canción</label>
+                    <input type="text" id="songTitle" placeholder="Ej: Zaza en Punta Cana">
+                </div>
+                <div class="input-group">
+                    <label for="songGenre">Género</label>
+                    <input type="text" id="songGenre" placeholder="Ej: Trap">
+                </div>
+                <button class="btn" id="generateBtn">Generar Canción (Ejemplo)</button>
+            </div>
+
+            <div class="panel">
+                <h2>Biblioteca de Canciones</h2>
+                <ul id="song-library-list">
+                    </ul>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="panel" id="result-display">
+                <h2>Resultado</h2>
+                <div id="song-output" style="display:none;">
+                    <div class="output-field">
+                        <h3><span>Lyrics</span><button class="copy-btn" data-target="lyrics-content">Copiar</button></h3>
+                        <pre id="lyrics-content"></pre>
+                    </div>
+                    <div class="output-field">
+                        <h3><span>Styles (Prompt Positivo)</span><button class="copy-btn" data-target="styles-content">Copiar</button></h3>
+                        <pre id="styles-content"></pre>
+                    </div>
+                    <div class="output-field">
+                        <h3><span>Exclude Styles (Prompt Negativo)</span><button class="copy-btn" data-target="exclude-styles-content">Copiar</button></h3>
+                        <pre id="exclude-styles-content"></pre>
+                    </div>
+                    <div class="output-field">
+                        <h3><span>Weirdness / Style Influence</span><button class="copy-btn" data-target="params-content">Copiar</button></h3>
+                        <pre id="params-content"></pre>
+                    </div>
+                     <button class="btn" id="saveBtn">Guardar en Biblioteca</button>
+                </div>
+                 <p id="placeholder-text">Ingresa un título y género y haz clic en "Generar" para ver un ejemplo. Luego, reemplaza el contenido con la canción creada y guárdala.</p>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const generateBtn = document.getElementById('generateBtn');
+            const saveBtn = document.getElementById('saveBtn');
+            const songTitleInput = document.getElementById('songTitle');
+            const songGenreInput = document.getElementById('songGenre');
+            
+            const songOutput = document.getElementById('song-output');
+            const placeholderText = document.getElementById('placeholder-text');
+
+            const lyricsContent = document.getElementById('lyrics-content');
+            const stylesContent = document.getElementById('styles-content');
+            const excludeStylesContent = document.getElementById('exclude-styles-content');
+            const paramsContent = document.getElementById('params-content');
+            
+            const libraryList = document.getElementById('song-library-list');
+
+            let currentSong = null;
+            let songs = JSON.parse(localStorage.getItem('songs')) || [];
+
+            const renderLibrary = () => {
+                libraryList.innerHTML = '';
+                songs.forEach(song => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <div class="song-info" data-id="${song.id}">
+                            <div class="song-title">${song.title}</div>
+                            <div class="song-genre">${song.genre}</div>
+                        </div>
+                        <div class="song-actions">
+                            <button class="delete-btn" data-id="${song.id}">&#128465;</button>
+                        </div>
+                    `;
+                    libraryList.appendChild(li);
+                });
+            };
+            
+            const displaySong = (song) => {
+                songTitleInput.value = song.title;
+                songGenreInput.value = song.genre;
+                lyricsContent.textContent = song.lyrics;
+                stylesContent.textContent = song.styles;
+                excludeStylesContent.textContent = song.excludeStyles;
+                paramsContent.textContent = `Weirdness: ${song.weirdness}\nStyle Influence: ${song.styleInfluence}`;
+                
+                placeholderText.style.display = 'none';
+                songOutput.style.display = 'block';
+                
+                currentSong = song;
+            };
+
+            generateBtn.addEventListener('click', () => {
+                const title = songTitleInput.value.trim();
+                const genre = songGenreInput.value.trim();
+
+                if (!title || !genre) {
+                    alert('Por favor, ingresa un título y un género.');
+                    return;
+                }
+
+                // --- LÓGICA DE GENERACIÓN (EJEMPLO) ---
+                // En un caso real, aquí iría la llamada a la IA.
+                // Por ahora, generamos un objeto de ejemplo para mostrar la funcionalidad.
+                const exampleSong = {
+                    id: Date.now(),
+                    title: title,
+                    genre: genre,
+                    lyrics: `[Intro]\nAquí van las letras de tu canción...\n\n[Chorus]\nEl coro pegajoso que crearás.`,
+                    styles: `Un prompt positivo que describe el género y el mood. Ej: ${genre}`,
+                    excludeStyles: `Prompts negativos para evitar estilos no deseados.`,
+                    weirdness: 10,
+                    styleInfluence: 90
+                };
+                
+                displaySong(exampleSong);
+            });
+
+            saveBtn.addEventListener('click', () => {
+                if (!currentSong) {
+                    alert('No hay canción para guardar. Genere una primero.');
+                    return;
+                }
+                
+                // Permite que el usuario edite el contenido antes de guardar
+                currentSong.lyrics = lyricsContent.textContent;
+                currentSong.styles = stylesContent.textContent;
+                currentSong.excludeStyles = excludeStylesContent.textContent;
+
+                const existingIndex = songs.findIndex(s => s.id === currentSong.id);
+                if (existingIndex > -1) {
+                    songs[existingIndex] = currentSong;
+                } else {
+                    songs.push(currentSong);
+                }
+                
+                localStorage.setItem('songs', JSON.stringify(songs));
+                renderLibrary();
+                alert(`'${currentSong.title}' guardado en la biblioteca.`);
+            });
+
+            // Delegación de eventos para botones de la biblioteca y copiado
+            document.body.addEventListener('click', (e) => {
+                // Botones de copiado
+                if (e.target.classList.contains('copy-btn')) {
+                    const targetId = e.target.dataset.target;
+                    const content = document.getElementById(targetId).textContent;
+                    navigator.clipboard.writeText(content).then(() => {
+                        e.target.textContent = '¡Copiado!';
+                        setTimeout(() => { e.target.textContent = 'Copiar'; }, 2000);
+                    }).catch(err => console.error('Error al copiar:', err));
+                }
+                
+                // Cargar canción desde la biblioteca
+                if (e.target.closest('.song-info')) {
+                    const songId = e.target.closest('.song-info').dataset.id;
+                    const songToLoad = songs.find(s => s.id == songId);
+                    if(songToLoad) displaySong(songToLoad);
+                }
+                
+                // Borrar canción de la biblioteca
+                if (e.target.classList.contains('delete-btn')) {
+                    const songId = e.target.dataset.id;
+                    songs = songs.filter(s => s.id != songId);
+                    localStorage.setItem('songs', JSON.stringify(songs));
+                    renderLibrary();
+                }
+            });
+
+            // Cargar biblioteca al iniciar
+            renderLibrary();
+        });
+    </script>
+</body>
+</html>
